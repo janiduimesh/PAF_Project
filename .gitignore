@@ -1,0 +1,11 @@
+# Ignore node_modules
+paf_frontend/node_modules/
+paf_backend/target/
+
+# Ignore environment files
+.env
+*.log
+
+# Ignore system files
+.DS_Store
+Thumbs.db
