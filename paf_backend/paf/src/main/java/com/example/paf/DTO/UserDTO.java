@@ -17,5 +17,8 @@ public class UserDTO {
     private String profileImageUrl;
     private String password;
     private String role;
+    private String currentPassword;
+    private String newPassword;
+    private String confirmPassword;
     
 }

@@ -232,6 +232,28 @@ public class UserServiceImpl implements UserService,UserDetailsService{
     }
     
 
+    @Override
+    public ResponseEntity<?> resetPassword(String email, UserDTO request) {
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        }
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            return new ResponseEntity<>("Current password is incorrect", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            return new ResponseEntity<>("New passwords do not match", HttpStatus.BAD_REQUEST);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        return new ResponseEntity<>("Password updated successfully", HttpStatus.OK);
+    }
+
 
 
         

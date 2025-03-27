@@ -106,7 +106,7 @@ const Register = () => {
       <section className="h-screen">
         <div className="container h-full px-6 py-24">
           <div className="g-6 flex h-full flex-wrap items-center justify-center lg:justify-between">
-            <div className="w-8/12 md:w-full lg:ml-6 lg:w-5/12 mb-2 mt-4 rounded-lg" style={{ backgroundColor: "rgba(255, 255, 255, 0.75)"
+            <div className="w-8/12 md:w-full lg:ml-6 lg:w-5/12 rounded-lg" style={{ backgroundColor: "rgba(255, 255, 255, 0.75)"
  }}>
                {/* SIGN IN Header */}
                <h2 className="text-center text-4xl font-bold text-black my-12">REGISTER</h2>

@@ -11,6 +11,8 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import toast from "react-hot-toast";
+
 
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
   zIndex: theme.zIndex.drawer + 1,
@@ -43,8 +45,10 @@ export default function TopHeader() {
       cancelButtonColor: '#3085d6',
     }).then((result) => {
       if (result.value) {
+        localStorage.removeItem("token");
         localStorage.removeItem("user");
-        navigate('/');
+        toast.success("Logged out successfully 👋");
+        navigate('/login');
       }
     });
   }

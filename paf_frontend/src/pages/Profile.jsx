@@ -10,12 +10,16 @@ import { CircularProgress } from "@mui/material";
 import Lottie from "lottie-react";
 import cookingAnim from "../images/Anime.json";
 import UpdateProfileDialog from "./UpdateProfileDialog";
+import ResetPasswordDialog from "./ResetPasswordDialog"; 
+
 
 
 
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
+
 
   const navigate = useNavigate();
 
@@ -115,11 +119,18 @@ const Profile = () => {
                 <UpdateProfileDialog
                     open={editOpen}
                     onClose={() => setEditOpen(false)}
-                    onSuccess={() => window.location.reload()} // Optional
+                    onSuccess={() => window.location.reload()} 
                     />
-                <Button variant="outlined" color="primary" onClick={handleResetPassword}>
+
+                <Button variant="outlined" onClick={() => setResetOpen(true)}>
                 Reset Password
                 </Button>
+
+                    <ResetPasswordDialog
+                    open={resetOpen}
+                    onClose={() => setResetOpen(false)}
+                    />
+                    
                 <Button variant="contained" color="error" onClick={handleDelete}>
                 Delete Profile
                 </Button>
