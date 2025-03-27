@@ -2,11 +2,11 @@ package com.example.paf.service;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
-import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+// import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -16,7 +16,7 @@ public class FirebaseStorageService {
 
     private final StorageClient storageClient;
 
-    @Autowired
+    // @Autowired
     public FirebaseStorageService(StorageClient storageClient) {
         this.storageClient = storageClient;
     }
