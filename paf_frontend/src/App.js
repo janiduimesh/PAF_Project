@@ -1,24 +1,65 @@
-import logo from './logo.svg';
-import './App.css';
+import './index.css';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { useEffect, useState } from 'react';
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+import Profile from "./pages/Profile";
+
+// import Layout from "./components/Layout";
+import PrivateRoute from "./components/PrivateRoute";
+
 
 function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    console.log("✅ In app.js:", token);
+
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
+    fetch("http://localhost:8080/api/auth/user", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(res => res.ok ? res.json() : Promise.reject('Not authenticated'))
+      .then(userData => {
+        setUser(userData);
+      })
+      .catch(err => {
+        console.error(err);
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Toaster position="top-center" />
+      <Routes>
+        {/* Public routes */}
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+  
+        <Route element={<PrivateRoute />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/profile" element={<Profile />} />
+
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
