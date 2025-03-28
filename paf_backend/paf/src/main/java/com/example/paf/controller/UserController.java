@@ -118,5 +118,7 @@ public class UserController {
             userRepository.save(user);
             return ResponseEntity.ok("Marked all as read");
         }
+
+        
             
 }
