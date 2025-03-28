@@ -36,7 +36,8 @@ public class WebSecurityConfig {
                 .requestMatchers(
                     "/api/auth/**",        
                     "/users/login",        
-                    "/users/register"
+                    "/users/register",
+                    "/users/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

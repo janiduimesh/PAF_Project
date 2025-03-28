@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Map;
+import java.time.LocalDateTime;
 
 
 import org.springframework.beans.BeanUtils;
@@ -31,6 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import com.example.paf.model.Notification;
+
 
 @Service
 public class UserServiceImpl implements UserService,UserDetailsService{
@@ -180,6 +183,68 @@ public class UserServiceImpl implements UserService,UserDetailsService{
     //         return new ResponseEntity<>("Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
     //     }
     // }
+
+    @Override
+public ResponseEntity<Object> followUser(String userId, String followedUserId) {
+    try {
+        if (userId.equals(followedUserId)) {
+            return ResponseEntity.badRequest().body("You can't follow yourself.");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        User userToFollow = userRepository.findById(followedUserId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + followedUserId));
+
+        if (user.getFollowingUsers() == null) user.setFollowingUsers(new ArrayList<>());
+        if (userToFollow.getFollowers() == null) userToFollow.setFollowers(new ArrayList<>());
+        if (userToFollow.getNotifications() == null) userToFollow.setNotifications(new ArrayList<>());
+
+        boolean isFollowing = user.getFollowingUsers().contains(followedUserId);
+
+        if (isFollowing) {
+            // Unfollow
+            user.getFollowingUsers().remove(followedUserId);
+            userToFollow.getFollowers().remove(userId);
+            user.setFollowingCount(user.getFollowingCount() - 1);
+            userToFollow.setFollowersCount(userToFollow.getFollowersCount() - 1);
+        } else {
+            // Follow
+            user.getFollowingUsers().add(followedUserId);
+            userToFollow.getFollowers().add(userId);
+            user.setFollowingCount(user.getFollowingCount() + 1);
+            userToFollow.setFollowersCount(userToFollow.getFollowersCount() + 1);
+
+            // 🔔 Create notification for the followed user
+            String followMessage = user.getName() + " started following you.";
+            boolean alreadyNotified = userToFollow.getNotifications().stream()
+                .anyMatch(n -> n.getMessage().equals(followMessage));
+
+            if (!alreadyNotified) {
+                Notification notification = new Notification();
+                notification.setMessage(followMessage);
+                notification.setCreatedAt(LocalDateTime.now());
+                notification.setRead(false);
+                userToFollow.getNotifications().add(notification);
+                System.out.println("🔔 Notification added: " + followMessage);
+            }
+
+            System.out.println("🔔 Notifications to be saved: " + userToFollow.getNotifications());
+
+        }
+
+        userRepository.save(user);
+        userRepository.save(userToFollow);
+
+        String message = isFollowing ? "Unfollowed user successfully" : "Followed user successfully";
+        return ResponseEntity.ok(Map.of("message", message));
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Server Error");
+    }
+}
 
 
     @Override

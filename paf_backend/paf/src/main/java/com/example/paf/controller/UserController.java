@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.paf.DTO.UserDTO;
 import com.example.paf.model.User;
+import com.example.paf.model.Notification;
 import com.example.paf.repo.UserRepository;
 import com.example.paf.service.UserService;
 import org.springframework.http.MediaType;
@@ -54,6 +55,22 @@ public class UserController {
     // public ResponseEntity<Object> followUser(@RequestParam String userId, @RequestParam String FollowedUserId) {
     //     return userService.followUser(userId,FollowedUserId);
     // }
+
+    @PostMapping("/{userId}/follow/{followedUserId}")
+    public ResponseEntity<Object> followUser(
+        @PathVariable String userId,
+        @PathVariable String followedUserId) {
+        return userService.followUser(userId, followedUserId);
+    }
+
+    @GetMapping("/{userId}/notifications")
+    public ResponseEntity<List<Notification>> getNotifications(@PathVariable String userId) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("User not found"));
+    return ResponseEntity.ok(user.getNotifications());
+}
+
+
     @PostMapping("/login")
     public ResponseEntity<Object> loginUser(@RequestBody User user) {
 
@@ -72,8 +89,8 @@ public class UserController {
 
         return ResponseEntity.ok(user); 
 }
-        @PutMapping("/update")
-        public ResponseEntity<Object> updateUser(
+    @PutMapping("/update")
+    public ResponseEntity<Object> updateUser(
                 @AuthenticationPrincipal UserDetails userDetails,
                 @RequestBody UserDTO request
         ) {
@@ -81,11 +98,25 @@ public class UserController {
         }
 
 
-        @PutMapping("/resetpassword")
-        public ResponseEntity<?> resetPassword(
+    @PutMapping("/resetpassword")
+    public ResponseEntity<?> resetPassword(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody UserDTO request) {
 
         return userService.resetPassword(userDetails.getUsername(), request);
         }
+
+        @PutMapping("/{userId}/notifications/mark-all-read")
+        public ResponseEntity<String> markAllNotificationsAsRead(@PathVariable String userId) {
+            User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+            if (user.getNotifications() != null) {
+                user.getNotifications().forEach(n -> n.setRead(true));
+            }
+        
+            userRepository.save(user);
+            return ResponseEntity.ok("Marked all as read");
+        }
+            
 }

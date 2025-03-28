@@ -3,6 +3,9 @@ package com.example.paf.DTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
+import com.example.paf.model.Notification;
+
 
 @Data
 @NoArgsConstructor
@@ -20,5 +23,7 @@ public class UserDTO {
     private String currentPassword;
     private String newPassword;
     private String confirmPassword;
+    private List<Notification> notifications;
+
     
 }

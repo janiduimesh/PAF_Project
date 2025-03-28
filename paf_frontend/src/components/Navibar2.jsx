@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Drawer, List, ListItem, ListItemAvatar, Avatar, ListItemText,
-  Toolbar, Typography, Box, Button
+  Drawer, List, ListItem, Avatar, Typography, Box, Button, Toolbar
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -10,49 +9,56 @@ const drawerWidth = 250;
 
 function NaviBar2({ logUser }) {
   const [users, setUsers] = useState([]);
+  const [followedUsers, setFollowedUsers] = useState([]);
   const navigate = useNavigate();
 
+  const token = localStorage.getItem("token");
+
+  // Fetch all users and current user's followed list
   useEffect(() => {
-    const fetchUsers = async () => {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        console.warn("❗ No token found in localStorage");
-        return;
-      }
-
+    const fetchData = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/users/all", {
+        // Get all users
+        const userRes = await axios.get("http://localhost:8080/users/all", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setUsers(userRes.data);
+
+        // Get logged-in user's followed users (optional backend route)
+        const followedRes = await axios.get(`http://localhost:8080/users/${logUser.id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        setUsers(res.data);
+        setFollowedUsers(followedRes.data.followingUsers || []);
       } catch (err) {
-        console.error("❌ Failed to fetch users", err);
+        console.error("❌ Error fetching users/follow data:", err);
       }
     };
 
-    fetchUsers();
-  }, []);
+    if (token && logUser?.id) {
+      fetchData();
+    }
+  }, [logUser, token]);
 
   const handleFollow = async (followedUserId) => {
-    const token = localStorage.getItem("token");
-
     try {
-      await axios.post(`http://localhost:8080/users/follow`, {
-        userId: logUser.id,
-        followedUserId,
-      }, {
+      await axios.post(`http://localhost:8080/users/${logUser.id}/follow/${followedUserId}`, {}, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      console.log("✅ Followed user:", followedUserId);
+      setFollowedUsers((prev) =>
+        prev.includes(followedUserId)
+          ? prev.filter((id) => id !== followedUserId) // unfollow
+          : [...prev, followedUserId] // follow
+      );
     } catch (err) {
-      console.error("❌ Failed to follow user:", err);
+      console.error("❌ Failed to follow/unfollow user:", err);
     }
   };
 
@@ -66,7 +72,7 @@ function NaviBar2({ logUser }) {
         [`& .MuiDrawer-paper`]: {
           width: drawerWidth,
           boxSizing: 'border-box',
-          background: 'linear-gradient(145deg,rgb(255, 254, 183),rgb(255, 183, 183))',
+          background: 'linear-gradient(145deg,rgb(246, 244, 166),rgb(255, 194, 194))',
           borderLeft: '1px solid #ddd',
           boxShadow: '-5px 5px 15px rgba(0, 0, 0, 0.05)',
           display: 'flex',
@@ -82,19 +88,30 @@ function NaviBar2({ logUser }) {
           justifyContent: 'center',
         }}
       >
-        
       </Toolbar>
+      <Box
+          sx={{
+            position: 'sticky',
+            top: 0,
+            pl:5,
+            mt:1,
+            backgroundColor: 'inherit',
+            zIndex: 1,
+            py: 1,
+          }}
+        >
+          <Typography variant="h6" fontWeight="bold" color="#B40614">
+          ✅ Active Users
+          </Typography>
+        </Box>
+      <Box sx={{ overflowY: 'auto', p: 2, mt: 1 }}>
 
-      <Box sx={{ overflowY: 'auto', p: 2 ,mt:1}}>
-      <Typography variant="h6" fontWeight="bold" color="#B40614">
-          Active Users
-        </Typography>
-        <List>
+         <List>
           {users
-            .filter(user => user?.id !== logUser?.id)
-            .map((user, index) => (
+            .filter((user) => user?.id !== logUser?.id)
+            .map((user) => (
               <ListItem
-                key={user.id || index}
+                key={user.id}
                 sx={{
                   mb: 1,
                   borderRadius: '8px',
@@ -103,7 +120,7 @@ function NaviBar2({ logUser }) {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  flexWrap: 'wrap', // ✅ Allow wrapping
+                  flexWrap: 'wrap',
                   '&:hover': {
                     backgroundColor: '#f0f0f0',
                   },
@@ -125,8 +142,8 @@ function NaviBar2({ logUser }) {
                   <Typography
                     fontSize="0.95rem"
                     sx={{
-                      whiteSpace: 'normal', 
-                      wordBreak: 'break-word', 
+                      whiteSpace: 'normal',
+                      wordBreak: 'break-word',
                       flex: 1,
                     }}
                   >
@@ -134,25 +151,27 @@ function NaviBar2({ logUser }) {
                   </Typography>
                 </Box>
 
-                {/* Follow Button */}
+                {/* Follow/Unfollow Button */}
                 <Button
                   variant="contained"
                   size="small"
                   sx={{
-                    backgroundColor: '#0000FF',
+                    backgroundColor: followedUsers.includes(user.id) ? '#B40614' : '#0000FF',
                     color: '#fff',
                     textTransform: 'none',
-                    minWidth: '70px',
+                    minWidth: '80px',
                     ml: 6,
-                    mt: { xs: 1, sm: 0 }, // stack below on small screens
-                    alignSelf: 'flex-start', // align at top
+                    mt: { xs: 1, sm: 0 },
+                    alignSelf: 'flex-start',
                     '&:hover': {
-                      backgroundColor: '#90CAF9',
+                      backgroundColor: followedUsers.includes(user.id)
+                        ? '#FF867C'
+                        : '#90CAF9',
                     },
                   }}
                   onClick={() => handleFollow(user.id)}
                 >
-                  Follow
+                  {followedUsers.includes(user.id) ? 'Unfollow' : 'Follow'}
                 </Button>
               </ListItem>
             ))}

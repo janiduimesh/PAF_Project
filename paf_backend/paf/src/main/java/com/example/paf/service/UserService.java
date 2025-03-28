@@ -14,6 +14,8 @@ public interface UserService {
     UserDTO getUserById(String userId);
     List<UserDTO> getAllUsers();
     // ResponseEntity<Object> followUser(String userId, String followedUserId);
+    ResponseEntity<Object> followUser(String userId, String followedUserId);
+
     ResponseEntity<Object> loginUser(String email, String password);  
     ResponseEntity<Object> updateUser(String email, UserDTO request);
     ResponseEntity<?> resetPassword(String email, UserDTO request);

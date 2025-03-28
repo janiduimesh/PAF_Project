@@ -12,11 +12,14 @@ import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import toast from "react-hot-toast";
+import NotificationBell from './NotificationBell';
+
 
 
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
   zIndex: theme.zIndex.drawer + 1,
-  background: 'linear-gradient(45deg,rgb(255, 203, 203),rgb(255, 244, 159))',
+  background: 'linear-gradient(45deg,rgb(255, 203, 203),rgb(254, 244, 164))',
+  boxShadow: 'none',
 }));
 
 export default function TopHeader() {
@@ -101,6 +104,9 @@ export default function TopHeader() {
               </Typography>
             )}
           </Box>
+          <Box>
+         <NotificationBell userId={JSON.parse(localStorage.getItem("user"))?.id} />
+         </Box>
 
           {/* Right side: Logout Button */}
           <Box>
