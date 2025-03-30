@@ -1,8 +1,8 @@
 import React from "react";
 import { Grid, Box, Typography } from "@mui/material";
 import Header from "../components/TopHeader";
-import NaviBar from "../components/NaviBar";      // Left sidebar
-import NaviBar2 from "../components/Navibar2";    // Right sidebar
+import NaviBar from "../components/NaviBar";      
+import NaviBar2 from "../components/Navibar2";    
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 
@@ -28,7 +28,7 @@ const Home = ({ title, children }) => {
           sx={{
             flexGrow: 1,
             px: 3,
-            pt: 10, // Add padding to push content below the header
+            pt: 10, 
           }}
         >
           {/* Optional Page Title */}

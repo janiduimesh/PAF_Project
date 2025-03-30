@@ -33,6 +33,7 @@ const UpdateProfileDialog = ({ open, onClose, onSuccess }) => {
     try {
       await API.put("/users/update", user);
       onSuccess?.();
+      localStorage.setItem("user", JSON.stringify(user));
       toast.success("Profile updated");
     } catch (err) {
       toast.error("Update failed");

@@ -33,12 +33,12 @@ function NaviBar() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem('token');  // Assuming JWT token is stored in localStorage
+      const token = localStorage.getItem('token');  
       if (token) {
         try {
           const response = await axios.get('http://localhost:8080/users/me', {
             headers: {
-              Authorization: `Bearer ${token}`,  // Sending the JWT token in Authorization header
+              Authorization: `Bearer ${token}`,  
             },
           });
           setUser(response.data);  
@@ -121,7 +121,7 @@ function NaviBar() {
       {user && (
       <Box sx={{ p: 2, background: 'linear-gradient(145deg,rgb(249, 233, 171),rgb(248, 245, 158))', textAlign: 'center' }}>
       <Avatar
-        src={user.profileImageUrl || '/path/to/default/image.jpg'}  // Use a fallback image if no profileImage is found
+        src={user.profileImageUrl || '/path/to/default/image.jpg'}  
         alt={user.name}
         sx={{ width: 56, height: 56, margin: '0 auto' }}
       />

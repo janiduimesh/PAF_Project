@@ -34,20 +34,25 @@ const ResetPasswordDialog = ({ open, onClose }) => {
 
   const handleSubmit = async () => {
     const { currentPassword, newPassword, confirmPassword } = form;
-
+  
     if (!currentPassword || !newPassword || !confirmPassword) {
       toast.error("Please fill all fields");
       return;
     }
-
+  
+    if (newPassword.length < 6) {
+      toast.error("New password must be at least 6 characters long");
+      return;
+    }
+  
     if (newPassword !== confirmPassword) {
       toast.error("New passwords do not match");
       return;
     }
-
+  
     setLoading(true);
     try {
-      await API.put("/users/reset-password", form);
+      await API.put("/users/resetpassword", form);
       toast.success("Password updated successfully");
       onClose();
     } catch (err) {
@@ -58,6 +63,7 @@ const ResetPasswordDialog = ({ open, onClose }) => {
       setLoading(false);
     }
   };
+  
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
