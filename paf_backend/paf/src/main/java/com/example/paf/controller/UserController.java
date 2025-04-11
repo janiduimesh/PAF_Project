@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 // import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.paf.DTO.ForgotPasswordRequest;
+import com.example.paf.DTO.ResetPasswordConfirmRequest;
 import com.example.paf.DTO.UserDTO;
 import com.example.paf.model.User;
 import com.example.paf.model.Notification;
@@ -118,6 +120,18 @@ public class UserController {
             userRepository.save(user);
             return ResponseEntity.ok("Marked all as read");
         }
+
+
+        @PostMapping("/forgot-password")
+            public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+                return userService.sendPasswordResetToken(request.getEmail());
+            }
+
+        @PostMapping("/reset-password-confirm")
+            public ResponseEntity<?> resetPasswordConfirm(@RequestBody ResetPasswordConfirmRequest request) {
+                return userService.resetPasswordWithToken(request);
+            }
+
 
         
             

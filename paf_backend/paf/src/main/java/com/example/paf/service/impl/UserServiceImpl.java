@@ -13,7 +13,7 @@ import com.example.paf.service.JwtUtil;
 
 import com.example.paf.model.RegistrationSource;
 import com.example.paf.model.User;
-
+import com.example.paf.DTO.ResetPasswordConfirmRequest;
 import com.example.paf.DTO.UserDTO;
 import com.example.paf.DTO.UserResDTO;
 
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.Map;
 import java.time.LocalDateTime;
 
@@ -318,6 +319,46 @@ public ResponseEntity<Object> followUser(String userId, String followedUserId) {
 
         return new ResponseEntity<>("Password updated successfully", HttpStatus.OK);
     }
+
+
+
+    @Override
+public ResponseEntity<?> sendPasswordResetToken(String email) {
+    User user = userRepository.findByEmail(email);
+    if (user == null) {
+        return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+    }
+
+    String token = UUID.randomUUID().toString();
+    user.setResetToken(token);
+    userRepository.save(user);
+
+    // Normally you'd email this token or link
+    return ResponseEntity.ok("Reset token: " + token);
+}
+
+@Override
+public ResponseEntity<?> resetPasswordWithToken(ResetPasswordConfirmRequest request) {
+    Optional<User> optionalUser = userRepository.findByResetToken(request.getToken());
+
+    if (optionalUser.isEmpty()) {
+        return new ResponseEntity<>("Invalid token", HttpStatus.BAD_REQUEST);
+    }
+
+    User user = optionalUser.get();
+
+    if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+        return new ResponseEntity<>("Passwords do not match", HttpStatus.BAD_REQUEST);
+    }
+
+    user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+    user.setResetToken(null); 
+    userRepository.save(user);
+
+    return new ResponseEntity<>("Password has been reset successfully", HttpStatus.OK);
+}
+
+
 
 
 

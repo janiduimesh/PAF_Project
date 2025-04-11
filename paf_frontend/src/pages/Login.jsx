@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { TEInput, TERipple } from "tw-elements-react";
+import { Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -110,7 +111,14 @@ const Login = () => {
                 <p className="mb-6 text-sm text-red-500">
                   {errors.password?.message}
                 </p>
-
+                <Typography
+                    variant="body2"
+                    color="primary"
+                    sx={{ mt: 1, cursor: "pointer", textAlign: "right" }}
+                    onClick={() => navigate("/forgot-password")}
+                  >
+                    Forgot Password?
+                  </Typography>
                 <TERipple rippleColor="light" className="w-full">
                   <button
                     type="submit"

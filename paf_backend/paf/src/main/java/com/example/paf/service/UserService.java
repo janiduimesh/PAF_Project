@@ -1,4 +1,5 @@
 package com.example.paf.service;
+import com.example.paf.DTO.ResetPasswordConfirmRequest;
 import com.example.paf.DTO.UserDTO;
 import com.example.paf.model.User;
 
@@ -19,6 +20,9 @@ public interface UserService {
     ResponseEntity<Object> loginUser(String email, String password);  
     ResponseEntity<Object> updateUser(String email, UserDTO request);
     ResponseEntity<?> resetPassword(String email, UserDTO request);
+
+    ResponseEntity<?> sendPasswordResetToken(String email);
+    ResponseEntity<?> resetPasswordWithToken(ResetPasswordConfirmRequest request);
 
   
     

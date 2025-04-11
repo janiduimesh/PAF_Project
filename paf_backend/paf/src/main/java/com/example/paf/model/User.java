@@ -32,6 +32,8 @@ public class User {
     private RegistrationSource source; 
     private List<String> followingUsers;  // IDs of users this user follows
     private List<String> followers;       // IDs of users who follow this user
+    private String resetToken;
+
 
     private int followingCount;
     private int followersCount;
