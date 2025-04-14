@@ -74,7 +74,7 @@ const Profile = () => {
           sx={{
             flexGrow: 1,
             px: 3,
-            pt: 12,
+            pt: 0,
           }}
         >
           {user ? (
@@ -111,20 +111,63 @@ const Profile = () => {
                 <strong>Mobile:</strong> {user.mobileNumber}
               </Typography>
 
+              <Box display="flex" justifyContent="center" gap={4} mt={3}>
+              {/* Following Card */}
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '2px solid rgba(0, 0, 0, 0.2)',
+                  minWidth: 120,
+                  textAlign: 'center',
+                }}
+              >
+                <Typography variant="h5" fontWeight="bold">
+                  {user.followingCount}
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Following
+                </Typography>
+              </Paper>
+
+              {/* Followers Card */}
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '2px solid rgba(0, 0, 0, 0.2)',
+                  minWidth: 120,
+                  textAlign: 'center',
+                }}
+              >
+                <Typography variant="h5" fontWeight="bold">
+                  {user.followersCount}
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Followers
+                </Typography>
+              </Paper>
+            </Box>
+
+            
               <Box sx={{ mt: 4, display: "flex", gap: 2, justifyContent: "center" }}>
                 <Button variant="contained" color="primary"  onClick={() => setEditOpen(true)}>
                   Update Profile
                 </Button>
 
-                <UpdateProfileDialog
+                    <UpdateProfileDialog
                     open={editOpen}
                     onClose={() => setEditOpen(false)}
                     onSuccess={() => window.location.reload()} 
                     />
 
-                <Button variant="outlined" onClick={() => setResetOpen(true)}>
-                Reset Password
-                </Button>
+                    <Button variant="outlined" onClick={() => setResetOpen(true)}>
+                    Reset Password
+                    </Button>
 
                     <ResetPasswordDialog
                     open={resetOpen}

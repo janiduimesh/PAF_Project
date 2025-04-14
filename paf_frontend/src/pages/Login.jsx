@@ -53,6 +53,10 @@ const Login = () => {
     window.location.href = "http://localhost:8080/oauth2/authorization/google";
   };
 
+  const handleFacebookLogin = () => {
+    window.location.href = "http://localhost:8080/oauth2/authorization/facebook";
+  };
+
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
       {/* Background Image Layer */}
@@ -135,6 +139,16 @@ const Login = () => {
                     className="mb-3 inline-block w-full rounded bg-red-600 px-7 pb-2.5 pt-3 text-sm font-medium uppercase leading-normal text-white"
                   >
                     Sign in with Google
+                  </button>
+                </TERipple>
+
+                <TERipple rippleColor="light" className="w-full">
+                  <button
+                    type="button"
+                    onClick={handleFacebookLogin}
+                    className="mb-3 inline-block w-full rounded bg-red-600 px-7 pb-2.5 pt-3 text-sm font-medium uppercase leading-normal text-white"
+                  >
+                    Sign in with Facebook
                   </button>
                 </TERipple>
 

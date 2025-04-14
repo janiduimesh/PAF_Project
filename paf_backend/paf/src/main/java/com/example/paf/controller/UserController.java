@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 // import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.paf.DTO.ForgotPasswordRequest;
 import com.example.paf.DTO.ResetPasswordConfirmRequest;
@@ -91,14 +94,16 @@ public class UserController {
 
         return ResponseEntity.ok(user); 
 }
-    @PutMapping("/update")
-    public ResponseEntity<Object> updateUser(
-                @AuthenticationPrincipal UserDetails userDetails,
-                @RequestBody UserDTO request
-        ) {
-            return userService.updateUser(userDetails.getUsername(), request);
-        }
-
+    @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateUser(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("mobileNumber") String mobileNumber,
+            @RequestParam(value = "file", required = false) MultipartFile file
+    ) {
+        return userService.updateUser(userDetails.getUsername(), name, email, mobileNumber, file);
+    }
 
     @PutMapping("/resetpassword")
     public ResponseEntity<?> resetPassword(
@@ -108,6 +113,12 @@ public class UserController {
         return userService.resetPassword(userDetails.getUsername(), request);
         }
 
+        @DeleteMapping("/{id}")
+        public ResponseEntity<?> deleteUserById(@PathVariable String id) {
+            return userService.deleteUserById(id);
+        }
+
+            
         @PutMapping("/{userId}/notifications/mark-all-read")
         public ResponseEntity<String> markAllNotificationsAsRead(@PathVariable String userId) {
             User user = userRepository.findById(userId)

@@ -24,6 +24,8 @@ public class UserDTO {
     private String newPassword;
     private String confirmPassword;
     private List<Notification> notifications;
+    private int followersCount;
+    private int followingCount;
 
     
 }

@@ -18,17 +18,17 @@ import cookingAnim from "../images/Anime3.json";
 const drawerWidth = 240;
 
 function NaviBar() {
-    const [users, setUser] = useState([]);
+    const [user, setUser] = useState([]);
   
   const location = useLocation();
-  const user = JSON.parse(localStorage.getItem("user"));
+  // const user = JSON.parse(localStorage.getItem("user"));
 
   const navItems = [
-    { text: 'Daily Posts', icon: <ArticleIcon />, path: '/', color: '#F28B82' }, // light red
+    { text: 'Daily Posts', icon: <ArticleIcon />, path: '/', color: '#F28B82' },
     { text: 'Recipes', icon: <RestaurantMenuIcon />, path: '/recipes', color: '#F28B82' },
     { text: 'Chefs', icon: <EmojiPeopleIcon />, path: '/chefs', color: '#F28B82' },
-    { text: 'My Uploads', icon: <UploadIcon />, path: '/my-uploads', color: '#A7F0BA' }, // light green
-    { text: 'My Profile', icon: <PersonIcon />, path: '/profile', color: '#AECBFA' }, // light blue
+    { text: 'My Uploads', icon: <UploadIcon />, path: '/my-uploads', color: '#A7F0BA' }, 
+    { text: 'My Profile', icon: <PersonIcon />, path: '/profile', color: '#AECBFA' }, 
   ];
 
   useEffect(() => {

@@ -27,7 +27,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
         HttpSecurity http,
-        JwtAuthenticationFilter jwtAuthenticationFilter // ✅ inject it here directly
+        JwtAuthenticationFilter jwtAuthenticationFilter 
     ) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))

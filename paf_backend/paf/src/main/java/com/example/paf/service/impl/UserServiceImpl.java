@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.paf.service.UserService;
 import com.example.paf.service.FirebaseStorageService;
@@ -281,21 +282,26 @@ public ResponseEntity<Object> followUser(String userId, String followedUserId) {
     }
 
     @Override
-    public ResponseEntity<Object> updateUser(String email, UserDTO request) {
+    public ResponseEntity<?> updateUser(String email, String name, String emailInput, String mobile, MultipartFile file) {
         User user = userRepository.findByEmail(email);
-    
         if (user == null) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }
-    
-        if (request.getName() != null) user.setName(request.getName());
-        if (request.getEmail() != null) user.setEmail(request.getEmail());
-        if (request.getMobileNumber() != null) user.setMobileNumber(request.getMobileNumber());
-        if (request.getProfileImageUrl() != null) user.setProfileImageUrl(request.getProfileImageUrl());
-    
+
+        user.setName(name);
+        user.setEmail(emailInput);
+        user.setMobileNumber(mobile);
+
+        if (file != null && !file.isEmpty()) {
+
+            String imageUrl = firebaseStorageService.uploadProfileImage(file, user.getEmail());
+            user.setProfileImageUrl(imageUrl);
+        }
+
         userRepository.save(user);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return ResponseEntity.ok(user);
     }
+
     
 
     @Override
@@ -320,6 +326,13 @@ public ResponseEntity<Object> followUser(String userId, String followedUserId) {
         return new ResponseEntity<>("Password updated successfully", HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<?> deleteUserById(String userId) {
+        userRepository.deleteById(userId);
+        return ResponseEntity.noContent().build();
+}
+
+
 
 
     @Override
@@ -333,8 +346,7 @@ public ResponseEntity<?> sendPasswordResetToken(String email) {
     user.setResetToken(token);
     userRepository.save(user);
 
-    // Normally you'd email this token or link
-    return ResponseEntity.ok("Reset token: " + token);
+    return ResponseEntity.ok(token);
 }
 
 @Override

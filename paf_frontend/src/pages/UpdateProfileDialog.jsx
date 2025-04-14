@@ -16,11 +16,16 @@ import toast from "react-hot-toast";
 
 const UpdateProfileDialog = ({ open, onClose, onSuccess }) => {
   const [user, setUser] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
 
   useEffect(() => {
     if (open) {
       API.get("/users/me")
-        .then((res) => setUser(res.data))
+        .then((res) => {
+          setUser(res.data);
+          setPreviewUrl(res.data.profileImageUrl);
+        })
         .catch(() => toast.error("Failed to load profile"));
     }
   }, [open]);
@@ -29,12 +34,33 @@ const UpdateProfileDialog = ({ open, onClose, onSuccess }) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async () => {
     try {
-      await API.put("/users/update", user);
-      onSuccess?.();
-      localStorage.setItem("user", JSON.stringify(user));
+      const formData = new FormData();
+      formData.append("name", user.name);
+      formData.append("email", user.email);
+      formData.append("mobileNumber", user.mobileNumber);
+      if (selectedFile) {
+        formData.append("file", selectedFile); // ✅ send image file
+      }
+
+      await API.put("/users/update", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       toast.success("Profile updated");
+      onSuccess?.();
+      onClose();
     } catch (err) {
       toast.error("Update failed");
     }
@@ -52,13 +78,19 @@ const UpdateProfileDialog = ({ open, onClose, onSuccess }) => {
           <Box component="form" noValidate>
             <Box textAlign="center" mb={3}>
               <Avatar
-                src={user.profileImageUrl}
+                src={previewUrl}
                 alt={user.name}
                 sx={{ width: 100, height: 100, mx: "auto", mb: 1 }}
               />
-              <Typography variant="caption" color="text.secondary">
-                Profile image (not editable)
-              </Typography>
+              <Button
+                component="label"
+                variant="outlined"
+                size="small"
+                sx={{ mt: 1 }}
+              >
+                Change Profile Image
+                <input type="file" hidden accept="image/*" onChange={handleFileChange} />
+              </Button>
             </Box>
 
             <TextField

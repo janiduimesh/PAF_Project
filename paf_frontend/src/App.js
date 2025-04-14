@@ -6,6 +6,11 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPasswordConfirm from "./pages/ResetPasswordConfirm";
+import OAuthSuccess from "./components/OAuthSuccess";
+
+
 
 // import Layout from "./components/Layout";
 import PrivateRoute from "./components/PrivateRoute";
@@ -52,6 +57,9 @@ function App() {
         {/* Public routes */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPasswordConfirm />} />
+        <Route path="/oauth-success" element={<OAuthSuccess />} />
   
         <Route element={<PrivateRoute />}>
             <Route path="/" element={<Home />} />
