@@ -10,6 +10,8 @@ import lombok.Data;
 @Builder
 public class RecipeTO {
 
+    private String id;  // Optional: carry it for updates
+
     private String userid;
     private String recipetopic;
     private String recipeingrediants;
@@ -20,3 +22,4 @@ public class RecipeTO {
     @Transient 
     private MultipartFile recipeimage;
 }
+

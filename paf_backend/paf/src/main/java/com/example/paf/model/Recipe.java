@@ -1,5 +1,6 @@
 package com.example.paf.model;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Builder;
 import lombok.Data;
@@ -8,6 +9,9 @@ import lombok.Data;
 @Data
 @Builder
 public class Recipe {
+    
+    @Id
+    private String id;
 
     private String userid;
     private String recipetopic;
@@ -18,4 +22,5 @@ public class Recipe {
     private String recipeimageurl;
 
 }
+
 
