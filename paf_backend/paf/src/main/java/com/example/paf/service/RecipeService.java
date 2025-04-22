@@ -7,6 +7,7 @@ import com.example.paf.dto.RecipeTO;
 import com.example.paf.model.Recipe;
 import com.example.paf.repository.RecipeRepository;
 
+//import java.io.IOException;
 import java.util.List;
 
 
@@ -26,6 +27,12 @@ public class RecipeService {
                 recipeTO.getRecipeimage(), recipeTO.getUserid()
             );
 
+            // Upload pdf to Firebase and get the URL -> newly added part
+            String pdfUrl = null;
+            if (recipeTO.getRecipepdf() != null && !recipeTO.getRecipepdf().isEmpty()) {
+                pdfUrl = firebaseStorageService.uploadRecipePDF(recipeTO.getRecipepdf(), recipeTO.getUserid());
+            }
+
             // Build the Recipe with the image URL
             Recipe recipe = Recipe.builder()
                     // .recipeid(recipeTO.getRecipeid())
@@ -36,6 +43,7 @@ public class RecipeService {
                     .recipeprimarylink(recipeTO.getRecipeprimarylink())
                     .recipesecondarylink(recipeTO.getRecipesecondarylink())
                     .recipeimageurl(imageUrl) 
+                    .recipepdfurl(pdfUrl)      //pdf URL new part
                     .build();
 
             recipeRepository.save(recipe);
@@ -91,10 +99,16 @@ public class RecipeService {
             // firebaseStorageService.deleterecipeImage(existingRecipe.getRecipeimageurl());
     
             // Upload new image to Firebase
-            String newImageUrl = firebaseStorageService.uploadrecipeImage(
-                updatedRecipeTO.getRecipeimage(), updatedRecipeTO.getUserid());
+            String newImageUrl = firebaseStorageService.uploadrecipeImage(updatedRecipeTO.getRecipeimage(), updatedRecipeTO.getUserid());
             existingRecipe.setRecipeimageurl(newImageUrl);
         }
+
+        // Upload new pdf to Firebase -> newly added part
+        if (updatedRecipeTO.getRecipepdf() != null && !updatedRecipeTO.getRecipepdf().isEmpty()) {
+            String newPdfUrl = firebaseStorageService.uploadRecipePDF(updatedRecipeTO.getRecipepdf(), updatedRecipeTO.getUserid());
+            existingRecipe.setRecipepdfurl(newPdfUrl);
+        }
+        
     
         // Update other fields
         existingRecipe.setUserid(updatedRecipeTO.getUserid());

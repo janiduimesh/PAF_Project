@@ -36,4 +36,24 @@ public class FirebaseStorageService {
             throw new RuntimeException("Failed to upload profile image", e);
         }
     }
+
+     //newly added part for pdf 
+
+    public String uploadRecipePDF(MultipartFile recipePdf, String userEmail) {
+        try {
+            String fileName = "recipe_pdfs/" + userEmail + "_" + UUID.randomUUID() + "_" + recipePdf.getOriginalFilename();
+    
+            Bucket bucket = storageClient.bucket("pafproject-40100.firebasestorage.app"); // Use default bucket
+            Blob blob = bucket.create(fileName, recipePdf.getBytes(), recipePdf.getContentType());
+    
+            return "https://firebasestorage.googleapis.com/v0/b/" + bucket.getName() + "/o/"
+                    + URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()) + "?alt=media";
+    
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload recipe PDF", e);
+        }
+    }
+
+    
+    
 }

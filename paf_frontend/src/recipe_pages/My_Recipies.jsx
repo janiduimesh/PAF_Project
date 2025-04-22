@@ -1,3 +1,4 @@
+// imports (unchanged)
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -11,6 +12,8 @@ import {
   Dialog,
   DialogContent,
   IconButton,
+  DialogActions,
+  DialogTitle,
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import Header from "../component/TopHeader";
@@ -20,12 +23,10 @@ import Update_Recipies from "./Update_Recipe"; // Ensure correct path
 import { useLocation } from "react-router-dom";
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
-// RecipeCard component now accepts an image URL and topic dynamically
+// RecipeCard component
 const RecipeCard = ({ title, image, onUpdate, recipeId, onDelete }) => {
   return (
     <Card sx={{ minWidth: 250, ml: 0 }}>
@@ -61,14 +62,14 @@ const RecipeCard = ({ title, image, onUpdate, recipeId, onDelete }) => {
               borderColor: 'red'
             }
           }}
-          onClick={() => onDelete(recipeId)} // Delete function call
+          onClick={() => onDelete(recipeId)}
         >
           Delete
         </Button>
         <Button
           variant="outlined"
           color="primary"
-          onClick={() => onUpdate(recipeId)}  // Pass recipeId to the update handler
+          onClick={() => onUpdate(recipeId)}
           sx={{
             borderRadius: '30px',
             fontFamily: 'Times New Roman',
@@ -88,6 +89,7 @@ const RecipeCard = ({ title, image, onUpdate, recipeId, onDelete }) => {
   );
 };
 
+// My_Recipies Component
 const My_Recipies = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -95,21 +97,16 @@ const My_Recipies = () => {
 
   const [recipes, setRecipes] = useState([]);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
-  const [selectedRecipe, setSelectedRecipe] = useState(null);  // To hold selected recipe details
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [recipeIdToDelete, setRecipeIdToDelete] = useState(null);
 
-  // Fetch user recipes on component mount
   useEffect(() => {
     const fetchUserRecipes = async () => {
       if (userId) {
         try {
-          console.log("User ID in My_Recipies:", userId); // Log the userId
-
           const response = await axios.get(`http://localhost:8081/recipe/user/${userId}`);
-          
-          // Log the fetched recipes
-          console.log("Fetched recipes:", response.data);
-
-          setRecipes(response.data); // Set the recipes in state
+          setRecipes(response.data);
         } catch (error) {
           console.error("Error fetching recipes for user:", error);
         }
@@ -117,51 +114,45 @@ const My_Recipies = () => {
     };
 
     fetchUserRecipes();
-  }, [userId]); // Dependency array ensures it re-fetches if userId changes
+  }, [userId]);
 
-  // Callback invoked when the Update button is clicked
   const handleUpdateClick = (recipeId) => {
-    // Find the recipe by ID
     const selectedRecipe = recipes.find(recipe => recipe.id === recipeId);
-    setSelectedRecipe(selectedRecipe); // Set selected recipe data
-    setOpenUpdateModal(true); // Open the update modal
+    setSelectedRecipe(selectedRecipe);
+    setOpenUpdateModal(true);
   };
 
-  // Delete the recipe from MongoDB (leaving Firebase image intact)
-  const handleDeleteClick = async (recipeId) => {
+  const handleDeleteClick = (recipeId) => {
+    setRecipeIdToDelete(recipeId);
+    setOpenConfirmDialog(true);
+  };
+
+  const confirmDelete = async () => {
     try {
-      // Update the URL to match the backend endpoint
-      await axios.delete(`http://localhost:8081/recipe/delete/${recipeId}`);  // Correct URL
-      setRecipes(prevRecipes => prevRecipes.filter(recipe => recipe.id !== recipeId)); // Remove deleted recipe from state
-      console.log(`Recipe with ID ${recipeId} deleted from MongoDB.`);
-      toast.success('Recipe successfully deleted!'); 
+      await axios.delete(`http://localhost:8081/recipe/delete/${recipeIdToDelete}`);
+      setRecipes(prevRecipes => prevRecipes.filter(recipe => recipe.id !== recipeIdToDelete));
+      toast.success('Recipe successfully deleted!');
     } catch (error) {
       console.error("Error deleting recipe:", error);
-      toast.error('Failed to delete recipe.'); 
+      toast.error('Failed to delete recipe.');
+    } finally {
+      setOpenConfirmDialog(false);
+      setRecipeIdToDelete(null);
     }
   };
 
-  const handleCloseModal = () => {
-    setOpenUpdateModal(false);
-  };
+  const handleCloseModal = () => setOpenUpdateModal(false);
+  const handleCloseConfirmDialog = () => setOpenConfirmDialog(false);
 
   return (
     <Container maxWidth="md" sx={{ paddingTop: 4 }}>
-      {/* Top Header */}
       <Grid container>
-        <Grid item xs={12}>
-          <Header />
-        </Grid>
+        <Grid item xs={12}><Header /></Grid>
       </Grid>
 
-      {/* Main Layout: Sidebar, Content, etc. */}
       <Grid container spacing={5} sx={{ display: "flex" }}>
-        {/* Left Sidebar */}
-        <Grid item>
-          <NaviBar />
-        </Grid>
+        <Grid item><NaviBar /></Grid>
 
-        {/* Content */}
         <Grid item xs>
           <Box sx={{ padding: 2, marginBottom: 4, textAlign: "center" }}>
             <Typography
@@ -173,7 +164,7 @@ const My_Recipies = () => {
               My Recipes
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', padding: 0 }}>
-              <IconButton onClick={() => navigate('/Insert_Recipies', { state: { userid: 'use005' } })} sx={{ p: 0, ml: 100 }}>
+              <IconButton onClick={() => navigate('/Insert_Recipies', { state: { userid: userId } })} sx={{ p: 0, ml: 100 }}>
                 <AddCircleOutlineIcon sx={{ fontSize: 40, color: 'black' }} />
               </IconButton>
             </Box>
@@ -185,32 +176,24 @@ const My_Recipies = () => {
                 <RecipeCard
                   title={recipe.recipetopic}
                   image={recipe.recipeimageurl}
-                  recipeId={recipe.id}  // Pass recipeId to the card
-                  onUpdate={handleUpdateClick}  // Pass the update handler
-                  onDelete={handleDeleteClick} // Pass the delete handler
+                  recipeId={recipe.id}
+                  onUpdate={handleUpdateClick}
+                  onDelete={handleDeleteClick}
                 />
               </Grid>
             ))}
           </Grid>
         </Grid>
 
-        {/* Right Sidebar */}
         <Grid item>
           <NaviBar2 logUser={JSON.parse(localStorage.getItem("user"))} />
         </Grid>
       </Grid>
 
-      {/* Dialog Popup for updating recipes */}
-      <Dialog
-        open={openUpdateModal}
-        onClose={handleCloseModal}
-        fullWidth
-        maxWidth="sm"
-      >
+      {/* Update Dialog */}
+      <Dialog open={openUpdateModal} onClose={handleCloseModal} fullWidth maxWidth="sm">
         <DialogContent>
-          {/* Pass the selectedRecipe prop to the Update_Recipies form */}
           <Update_Recipies recipe={selectedRecipe} onClose={handleCloseModal} />
-          {/* Optionally, add a close button here */}
           <Box sx={{ textAlign: 'center', mt: 2 }}>
             <Button
               variant="contained"
@@ -232,10 +215,24 @@ const My_Recipies = () => {
           </Box>
         </DialogContent>
       </Dialog>
+
+      {/* Confirmation message - newly updated one */}
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
+        <DialogTitle>Are you sure you want to delete this recipe?</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleCloseConfirmDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={confirmDelete} color="error" variant="contained">
+            Yes, Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <ToastContainer />
     </Container>
   );
 };
-
 
 export default My_Recipies;

@@ -21,5 +21,8 @@ public class RecipeTO {
 
     @Transient 
     private MultipartFile recipeimage;
+
+    @Transient
+    private MultipartFile recipepdf;           //newly added part
 }
 

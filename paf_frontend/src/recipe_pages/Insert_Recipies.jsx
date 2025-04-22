@@ -25,12 +25,14 @@ const Insert_Recipies = () => {
     description: '',
     link1: '',
     link2: '',
-    image: null
+    image: null,
+    pdf: null // New state for the PDF file
   };
 
   const navigate = useNavigate();
-  const [formData, setFormData] = useState(initialFormState);
+  const [formData, setFormData] = useState(initialFormState);          
   const [imagePreview, setImagePreview] = useState(null);
+  const [pdfPreview, setPdfPreview] = useState(null);            // State to preview the PDF file name
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -45,7 +47,7 @@ const Insert_Recipies = () => {
     );
   }
 
-  const handleChange = (e) => {
+  const handleChange = (e) => {                              //added some changers
     const { name, value, files } = e.target;
 
     if (name === 'image') {
@@ -58,6 +60,17 @@ const Insert_Recipies = () => {
         setError('Please select a valid image file.');
         setFormData({ ...formData, image: null });
         setImagePreview(null);
+      }
+    } else if (name === 'pdf') {
+      const file = files[0];
+      if (file && file.type === 'application/pdf') {
+        setFormData({ ...formData, pdf: file });
+        setPdfPreview(file.name); // Preview PDF file name
+        setError('');
+      } else {
+        setError('Please select a valid PDF file.');
+        setFormData({ ...formData, pdf: null });
+        setPdfPreview(null);
       }
     } else {
       setFormData({ ...formData, [name]: value });
@@ -81,6 +94,11 @@ const Insert_Recipies = () => {
     data.append('recipesecondarylink', formData.link2);
     data.append('recipeimage', formData.image);
 
+    // Append PDF if provided
+    if (formData.pdf) {
+      data.append('recipepdf', formData.pdf);            //newly added
+    }
+
     try {
       const response = await fetch('http://localhost:8081/recipe/create', {
         method: 'POST',
@@ -92,6 +110,7 @@ const Insert_Recipies = () => {
         toast.success("Recipe submitted successfully!");
         setFormData(initialFormState);
         setImagePreview(null);
+        setPdfPreview(null); 
       } else {
         const text = await response.text();
         setError(`Error: ${text}`);
@@ -106,6 +125,7 @@ const Insert_Recipies = () => {
   const handleReset = () => {
     setFormData(initialFormState);
     setImagePreview(null);
+    setPdfPreview(null);                   //newly added
     setError('');
     setSuccessMessage('');
   };
@@ -146,12 +166,39 @@ const Insert_Recipies = () => {
               )}
             </Box>
 
+              {/* newly added part */}
+
+            <Box sx={{ my: 2 }}>
+              <Typography variant="body1">Upload PDF</Typography>
+              <input type="file" name="pdf" accept="application/pdf" onChange={handleChange} />
+              {pdfPreview && <Typography variant="body2">Selected PDF: {pdfPreview}</Typography>}
+            </Box>
+
             <Grid container spacing={2} justifyContent="center" sx={{ mt: 3 }}>
               <Grid item>
-                <Button onClick={handleReset} variant="outlined" color="secondary">Reset</Button>
+                <Button onClick={handleReset} variant="outlined" color="secondary" 
+                sx={{bgcolor: 'white',
+                  borderRadius:6,
+                  color: 'black',
+                  border: '1px solid black',
+                  '&:hover': {
+                    bgcolor: 'black',
+                    color: 'white',
+                    border: '1px solid black',}}}>
+                  Reset
+                </Button>
               </Grid>
               <Grid item>
-                <Button type="submit" variant="outlined" color="primary">Submit Recipe</Button>
+                <Button type="submit" variant="outlined" color="primary" 
+                sx={{bgcolor: 'white',
+                  color: 'black',
+                  border: '1px solid black',
+                  borderRadius:6,
+                  '&:hover': {
+                    bgcolor: 'black',
+                    color: 'white',
+                    border: '1px solid black',}}}>
+                  Submit Recipe</Button>
               </Grid>
             </Grid>
           </Box>

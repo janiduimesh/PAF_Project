@@ -11,7 +11,6 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
 const Update_Recipies = ({ recipe, onClose }) => {
   const initialFormState = {
     topic: '',
@@ -19,7 +18,8 @@ const Update_Recipies = ({ recipe, onClose }) => {
     description: '',
     link1: '',
     link2: '',
-    image: null
+    image: null,
+    pdf: null
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -35,7 +35,8 @@ const Update_Recipies = ({ recipe, onClose }) => {
         description: recipe.recipedescription || '',
         link1: recipe.recipeprimarylink || '',
         link2: recipe.recipesecondarylink || '',
-        image: null, // Image will only be set if user selects one
+        image: null,
+        pdf: null
       });
 
       setImagePreview(recipe.recipeimageurl || null);
@@ -47,7 +48,6 @@ const Update_Recipies = ({ recipe, onClose }) => {
 
     if (name === 'image') {
       const file = files[0];
-
       if (files.length > 1) {
         setError('Only one image can be uploaded.');
         return;
@@ -60,6 +60,19 @@ const Update_Recipies = ({ recipe, onClose }) => {
       } else {
         setError('Please select a valid image file.');
       }
+    } else if (name === 'pdf') {
+      const file = files[0];
+      if (files.length > 1) {
+        setError('Only one PDF can be uploaded.');
+        return;
+      }
+
+      if (file && file.type === 'application/pdf') {
+        setFormData(prev => ({ ...prev, pdf: file }));
+        setError('');
+      } else {
+        setError('Please select a valid PDF file.');
+      }
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -69,25 +82,29 @@ const Update_Recipies = ({ recipe, onClose }) => {
     e.preventDefault();
 
     const data = new FormData();
-    data.append("id", recipe.id); // ensure correct dataset
+    data.append("id", recipe.id);
     if (userId) {
       data.append("userid", userId);
     } else if (recipe.userid) {
       data.append("userid", recipe.userid);
-    }     
+    }
 
-    // Only update fields that are in the form. If unchanged, use original recipe values.
     data.append("recipetopic", formData.topic || recipe.recipetopic);
     data.append("recipeingrediants", formData.ingredients || recipe.recipeingrediants);
     data.append("recipedescription", formData.description || recipe.recipedescription);
     data.append("recipeprimarylink", formData.link1 || recipe.recipeprimarylink);
     data.append("recipesecondarylink", formData.link2 || recipe.recipesecondarylink);
 
-    // If new image is selected, append it; else append existing image URL
     if (formData.image) {
       data.append("recipeimage", formData.image);
     } else {
       data.append("existingImageUrl", recipe.recipeimageurl);
+    }
+
+    if (formData.pdf) {                             //newly added part
+      data.append("recipepdf", formData.pdf);
+    } else {
+      data.append("existingPdfUrl", recipe.recipepdfurl);
     }
 
     try {
@@ -98,8 +115,8 @@ const Update_Recipies = ({ recipe, onClose }) => {
       });
 
       if (response.status === 200) {
-        toast.success('Recipe updated successfully!'); 
-        onClose(); // close modal or page
+        toast.success('Recipe updated successfully!');
+        onClose();
       }
     } catch (err) {
       console.error("Error updating recipe:", err);
@@ -191,13 +208,50 @@ const Update_Recipies = ({ recipe, onClose }) => {
           )}
         </Box>
 
+          {/* newly added one - pdf part view current pdf and update part */}
+        <Box sx={{ my: 2 }}>
+          <Typography variant="body1">Upload PDF</Typography>
+          <input
+            type="file"
+            name="pdf"
+            accept="application/pdf"
+            onChange={handleChange}
+          />
+          {error && (
+            <Typography variant="body2" color="error">{error}</Typography>
+          )}
+          {recipe.recipepdfurl && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2">Current PDF:</Typography>
+              <a
+                href={recipe.recipepdfurl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'blue', textDecoration: 'underline' }}
+              >
+                View Current PDF
+              </a>
+            </Box>
+          )}
+        </Box>
+
         <Grid container spacing={2} justifyContent="center">
           <Grid item>
             <Button
               variant="contained"
               color="primary"
               type="submit"
-              sx={{ px: 4, py: 1.5, borderRadius: '30px', textTransform: 'none' }}
+              sx={{ px: 4, py: 1.5, 
+                borderRadius: '30px', 
+                textTransform: 'none',
+                bgcolor: 'white',
+                color: 'black',
+                border: '1px solid black',
+                '&:hover': {
+                  bgcolor: 'black',
+                  color: 'white',
+                  border: '1px solid black',
+               }}}
             >
               Update Recipe
             </Button>

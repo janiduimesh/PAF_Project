@@ -5,7 +5,8 @@ import {
   Container, 
   Grid, 
   Typography, 
-  Link 
+  Link, 
+  Button 
 } from '@mui/material';
 import axios from 'axios';
 import Header from "../component/TopHeader";
@@ -20,39 +21,41 @@ const Full_Recipies = () => {
     const fetchRecipe = async () => {
       try {
         const response = await axios.get(`http://localhost:8081/recipe/${id}`);
+        console.log("Fetched recipe:", response.data); // 👈 add this
         setRecipe(response.data);
       } catch (error) {
         console.error("Error fetching recipe:", error);
       }
     };
-
+  
     fetchRecipe();
   }, [id]);
+  
 
   if (!recipe) return <Typography>Loading...</Typography>;
 
   return (
     <Container maxWidth="md" sx={{ paddingTop: 4 }}>
       <Grid container>
-        <Grid item xs={12}><Header /></Grid>
+        <Grid xs={12}><Header /></Grid>
       </Grid>
 
       <Grid container spacing={0} sx={{ display: "flex" }}>
         <Grid item><NaviBar /></Grid>
 
-        <Grid item xs>
+        <Grid xs>
           <Typography 
-              variant="h2" 
-              align="center" 
-              sx={{ fontFamily: 'Times New Roman', mb: 4 }}
-            >
-              👨‍🍳 {recipe.recipetopic} 👨‍🍳
+            variant="h2" 
+            align="center" 
+            sx={{ fontFamily: 'Times New Roman', mb: 5,mt:5 }}
+          >
+            👨‍🍳 {recipe.recipetopic} 👨‍🍳
           </Typography>
-          <Box component="main" sx={{ px: 0, pt: 0, border: '1px',mt: 4,padding: '40px', width:'100%',boxShadow: 'inset 0 0 10px rgba(113, 113, 113, 0.3)',
-            backgroundColor: '#fdfdfd' }}>
+          
+          <Box component="main" sx={{ px: 0, pt: 0, border: '1px', mt: 4, padding: '40px', width: '100%', boxShadow: 'inset 0 0 10px rgba(113, 113, 113, 0.3)', backgroundColor: '#fdfdfd', position: 'relative', mb: 5 }}>
             
             <Grid container spacing={10} alignItems="flex-start" sx={{ mb: 6, ml: 0, mt: 0 }}>
-              <Grid item xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <Box
                   component="img"
                   src={recipe.recipeimageurl}
@@ -60,11 +63,11 @@ const Full_Recipies = () => {
                   sx={{ width: 500, height: 400, borderRadius: 2, ml: 0 }}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
-                <Typography variant="h4" sx={{ fontFamily: 'Times New Roman', mb: 3}}>
+              <Grid xs={12} md={6}>
+                <Typography variant="h4" sx={{ fontFamily: 'Times New Roman', mb: 3 }}>
                   Ingredients
                 </Typography>
-                <ul style={{ fontFamily: 'Times New Roman', fontSize: '20px', marginLeft: '30px',lineHeight: '1.8' }}>
+                <ul style={{ fontFamily: 'Times New Roman', fontSize: '20px', marginLeft: '30px', lineHeight: '1.8' }}>
                   {recipe.recipeingrediants.split(',').map((item, index) => (
                     <li key={index}>{item.trim()}</li>
                   ))}
@@ -72,18 +75,13 @@ const Full_Recipies = () => {
               </Grid>
             </Grid>
 
-            <Typography
-              variant="body1"
-              paragraph
-              sx={{ fontFamily: 'Times New Roman', mb: 4, mx: 0 }}
-            >
-              <Typography variant="h4" sx={{ fontFamily: 'Times New Roman', mb: 3 }}>
-                Making Steps
-              </Typography>
+            <Typography variant="h4" sx={{ fontFamily: 'Times New Roman', mb: 3 }}>
+              Making Steps
+            </Typography>
+            <Typography variant="body1" paragraph sx={{ fontFamily: 'Times New Roman', mb: 4, mx: 0 }}>
               {recipe.recipedescription}
             </Typography>
 
-            {/* Display primary and secondary links */}
             <Typography 
               variant="h4" 
               sx={{ fontFamily: 'Times New Roman', mb: 2, ml: 0 }}
@@ -105,7 +103,6 @@ const Full_Recipies = () => {
               </Typography>
             )}
 
-
             {recipe.recipesecondarylink && (
               <Typography sx={{ fontFamily: 'Times New Roman', mb: 1, ml: 0 }}>
                 <Box component="span" sx={{ fontSize: '17px' }}>Secondary Link: </Box>
@@ -121,8 +118,36 @@ const Full_Recipies = () => {
               </Typography>
             )}
 
+            {/* newly added part pdf download button */}
+            {/* Bottom-right Download Button */}    
+            <Box 
+              sx={{ 
+                position: 'absolute', 
+                bottom: 20, 
+                right: 20 
+              }}
+            >
+              <Button 
+                variant="contained" 
+                color="success" 
+                sx={{ 
+                  px: 2, 
+                  py: 1, 
+                  fontSize: '16px', 
+                  fontWeight: 'bold', 
+                  borderRadius: 6 
+                }}
+                href={recipe.recipepdfurl}
+                target="_blank"
+                download={`Recipe_${recipe.recipetopic}.pdf`}
+              >
+                📄 Download PDF
+              </Button>
+            </Box>
+
 
           </Box>
+          
         </Grid>
 
         <Grid item>

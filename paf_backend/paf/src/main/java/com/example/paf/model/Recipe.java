@@ -20,6 +20,8 @@ public class Recipe {
     private String recipeprimarylink;
     private String recipesecondarylink;
     private String recipeimageurl;
+    private String recipepdfurl;      // ← New PDF field
+
 
 }
 
