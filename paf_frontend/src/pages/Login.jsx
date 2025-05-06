@@ -1,16 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { TEInput, TERipple } from "tw-elements-react";
 import { Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import loginBg from "../images/log.jpg"; 
-
+import loginBg from "../images/log.jpg";
 
 const Login = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
 
   const {
     register,
@@ -18,7 +18,19 @@ const Login = () => {
     formState: { errors },
   } = useForm();
 
+  // Countdown timer for lockout
+  useEffect(() => {
+    if (lockoutSeconds > 0) {
+      const timer = setTimeout(() => {
+        setLockoutSeconds(lockoutSeconds - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [lockoutSeconds]);
+
   const onSubmit = async (data) => {
+    if (lockoutSeconds > 0) return;
+
     setIsSubmitting(true);
     try {
       const response = await axios.post("http://localhost:8080/users/login", {
@@ -38,12 +50,20 @@ const Login = () => {
         toast.error("Login failed: Token or user not received.");
       }
     } catch (error) {
+      const status = error?.response?.status;
       const errData = error?.response?.data;
-      const message =
-        typeof errData === "string"
-          ? errData
-          : errData?.error || "Something went wrong";
-      toast.error(message);
+
+      if (status === 429) {
+        // Extract seconds from message like "Too many attempts. Try again in 27 seconds."
+        const match = errData?.match(/in (\d+) seconds/);
+        const seconds = match ? parseInt(match[1]) : 30;
+        setLockoutSeconds(seconds);
+        toast.error(errData || "Too many attempts. Try again soon.");
+      } else if (status === 401) {
+        toast.error(errData || "Invalid email or password");
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -54,7 +74,8 @@ const Login = () => {
   };
 
   const handleFacebookLogin = () => {
-    window.location.href = "http://localhost:8080/oauth2/authorization/facebook";
+    window.location.href =
+      "http://localhost:8080/oauth2/authorization/facebook";
   };
 
   return (
@@ -85,8 +106,10 @@ const Login = () => {
               className="w-8/12 md:w-full lg:ml-6 lg:w-5/12 mb-2 mt-4 rounded-lg"
               style={{ backgroundColor: "rgba(255, 255, 255, 0.7)" }}
             >
-               {/* SIGN IN Header */}
-                <h2 className="text-center text-4xl font-bold text-black my-12">SIGN IN</h2>
+              {/* SIGN IN Header */}
+              <h2 className="text-center text-4xl font-bold text-black my-12">
+                SIGN IN
+              </h2>
 
               <form
                 className="ml-6 mr-6 mt-6 mb-6"
@@ -109,26 +132,35 @@ const Login = () => {
                   label="Password"
                   size="lg"
                   className="mb-1"
-                  {...register("password", { required: "Password is required" })}
+                  {...register("password", {
+                    required: "Password is required",
+                  })}
                   isInvalid={errors.password}
                 />
                 <p className="mb-6 text-sm text-red-500">
                   {errors.password?.message}
                 </p>
+
                 <Typography
-                    variant="body2"
-                    color="primary"
-                    sx={{ mt: 1, cursor: "pointer", textAlign: "right" }}
-                    onClick={() => navigate("/forgot-password")}
-                  >
-                    Forgot Password?
-                  </Typography>
+                  variant="body2"
+                  color="primary"
+                  sx={{ mt: 1, cursor: "pointer", textAlign: "right" }}
+                  onClick={() => navigate("/forgot-password")}
+                >
+                  Forgot Password?
+                </Typography>
+
                 <TERipple rippleColor="light" className="w-full">
                   <button
                     type="submit"
-                    className="mb-3 inline-block w-full rounded bg-primary px-7 pb-2.5 pt-3 text-sm font-medium uppercase leading-normal text-white"
+                    disabled={isSubmitting || lockoutSeconds > 0}
+                    className="mb-3 inline-block w-full rounded bg-primary px-7 pb-2.5 pt-3 text-sm font-medium uppercase leading-normal text-white disabled:opacity-50"
                   >
-                    {isSubmitting ? "Logging in..." : "Login"}
+                    {lockoutSeconds > 0
+                      ? `Locked (${lockoutSeconds}s)`
+                      : isSubmitting
+                      ? "Logging in..."
+                      : "Login"}
                   </button>
                 </TERipple>
 

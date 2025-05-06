@@ -68,8 +68,8 @@ const UpdateProfileDialog = ({ open, onClose, onSuccess }) => {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Update Profile</DialogTitle>
-      <DialogContent>
+      <DialogTitle sx={{backgroundColor: 'rgb(255, 235, 205)'}}>Update Profile</DialogTitle>
+      <DialogContent sx={{ backgroundColor: 'rgb(255, 249, 230)' }}>
         {!user ? (
           <Box textAlign="center" py={5}>
             <CircularProgress />
@@ -106,6 +106,7 @@ const UpdateProfileDialog = ({ open, onClose, onSuccess }) => {
               name="email"
               fullWidth
               margin="normal"
+              InputProps={{ readOnly: true }}
               value={user.email}
               onChange={handleChange}
             />

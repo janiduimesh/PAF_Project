@@ -6,10 +6,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.example.paf.service.UserService;
 import com.example.paf.service.FirebaseStorageService;
 import com.example.paf.service.JwtUtil;
+import com.example.paf.service.EmailService;
+
 
 
 import com.example.paf.model.RegistrationSource;
@@ -27,6 +30,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.Map;
 import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.Duration;
+
 
 
 import org.springframework.beans.BeanUtils;
@@ -40,6 +46,10 @@ import com.example.paf.model.Notification;
 @Service
 public class UserServiceImpl implements UserService,UserDetailsService{
 
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
+
     @Autowired
     private UserRepository userRepository;
 
@@ -48,6 +58,9 @@ public class UserServiceImpl implements UserService,UserDetailsService{
 
     @Autowired
     private FirebaseStorageService firebaseStorageService;
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -248,38 +261,62 @@ public ResponseEntity<Object> followUser(String userId, String followedUserId) {
     }
 }
 
+@Override
+public ResponseEntity<Object> loginUser(String email, String password) {
+    System.out.println("Login attempt for email: " + email);
 
-    @Override
-    public ResponseEntity<Object> loginUser(String email, String password) {
-        System.out.println("Login attempt for email: " + email);
+    User user = userRepository.findByEmail(email);
+    System.out.println("User fetched: " + user);
 
-        User user = userRepository.findByEmail(email);
-        System.out.println("User fetched: " + user);
+    if (user == null || user.getPassword() == null) {
+        System.out.println("Invalid user or missing password");
+        return new ResponseEntity<>("Invalid password or email", HttpStatus.UNAUTHORIZED);
+    }
 
-        if (user == null || user.getPassword() == null) {
-            System.out.println("Invalid user or missing password");
-            return new ResponseEntity<>("Invalid password or email", HttpStatus.UNAUTHORIZED);
-        }
-
-        System.out.println("Comparing password...");
-        if (passwordEncoder.matches(password, user.getPassword())) {
-            UserResDTO userDto = new UserResDTO();
-            BeanUtils.copyProperties(user, userDto);
-            System.out.println("Login success");
-
-            // ✅ Generate JWT token
-            String token = jwtUtil.generateToken(user.getEmail());
-
-            // ✅ Return both user and token
-            return ResponseEntity.ok(Map.of(
-                "user", userDto,
-                "token", token
-            ));
+    // ✅ Check for lockout
+    if (user.getFailedLoginAttempts() >= 3) {
+        Instant now = Instant.now();
+        Instant unlockTime = user.getLastFailedLoginTime().plusSeconds(30);
+        if (now.isBefore(unlockTime)) {
+            long secondsLeft = Duration.between(now, unlockTime).getSeconds();
+            System.out.println("Account temporarily locked: " + secondsLeft + " seconds remaining");
+            return new ResponseEntity<>("Too many attempts. Try again in " + secondsLeft + " seconds.",
+                    HttpStatus.TOO_MANY_REQUESTS);
         } else {
-            System.out.println("Password mismatch");
-            return new ResponseEntity<>("Invalid password or email", HttpStatus.UNAUTHORIZED);
+            // ✅ Unlock after timeout
+            user.setFailedLoginAttempts(0);
+            user.setLastFailedLoginTime(null);
         }
     }
+
+    System.out.println("Comparing password...");
+    if (passwordEncoder.matches(password, user.getPassword())) {
+        System.out.println("Login success");
+
+        user.setFailedLoginAttempts(0);
+        user.setLastFailedLoginTime(null);
+        userRepository.save(user);
+
+        UserResDTO userDto = new UserResDTO();
+        BeanUtils.copyProperties(user, userDto);
+
+        String token = jwtUtil.generateToken(user.getEmail());
+
+        return ResponseEntity.ok(Map.of(
+            "user", userDto,
+            "token", token
+        ));
+    } else {
+        System.out.println("Password mismatch");
+
+        user.setFailedLoginAttempts(user.getFailedLoginAttempts() + 1);
+        user.setLastFailedLoginTime(Instant.now());
+        userRepository.save(user);
+
+        return new ResponseEntity<>("Invalid password or email", HttpStatus.UNAUTHORIZED);
+    }
+}
+
 
     @Override
     public ResponseEntity<?> updateUser(String email, String name, String emailInput, String mobile, MultipartFile file) {
@@ -334,8 +371,7 @@ public ResponseEntity<Object> followUser(String userId, String followedUserId) {
 
 
 
-
-    @Override
+@Override
 public ResponseEntity<?> sendPasswordResetToken(String email) {
     User user = userRepository.findByEmail(email);
     if (user == null) {
@@ -346,8 +382,12 @@ public ResponseEntity<?> sendPasswordResetToken(String email) {
     user.setResetToken(token);
     userRepository.save(user);
 
-    return ResponseEntity.ok(token);
+    String resetLink = frontendUrl + "/reset-password?token=" + token;
+    emailService.sendPasswordResetEmail(email, resetLink); // ✅ send email
+
+    return ResponseEntity.ok("Reset link sent to your email");
 }
+
 
 @Override
 public ResponseEntity<?> resetPasswordWithToken(ResetPasswordConfirmRequest request) {
@@ -359,12 +399,13 @@ public ResponseEntity<?> resetPasswordWithToken(ResetPasswordConfirmRequest requ
 
     User user = optionalUser.get();
 
+
     if (!request.getNewPassword().equals(request.getConfirmPassword())) {
         return new ResponseEntity<>("Passwords do not match", HttpStatus.BAD_REQUEST);
     }
 
     user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-    user.setResetToken(null); 
+    user.setResetToken(null);
     userRepository.save(user);
 
     return new ResponseEntity<>("Password has been reset successfully", HttpStatus.OK);
@@ -372,6 +413,40 @@ public ResponseEntity<?> resetPasswordWithToken(ResetPasswordConfirmRequest requ
 
 
 
+// @Override
+// public ResponseEntity<?> sendPasswordResetToken(String email) {
+//     User user = userRepository.findByEmail(email);
+//     if (user == null) {
+//         return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+//     }
+
+//     String token = UUID.randomUUID().toString();
+//     user.setResetToken(token);
+//     userRepository.save(user);
+
+//     return ResponseEntity.ok(token);
+// }
+
+// @Override
+// public ResponseEntity<?> resetPasswordWithToken(ResetPasswordConfirmRequest request) {
+//     Optional<User> optionalUser = userRepository.findByResetToken(request.getToken());
+
+//     if (optionalUser.isEmpty()) {
+//         return new ResponseEntity<>("Invalid token", HttpStatus.BAD_REQUEST);
+//     }
+
+//     User user = optionalUser.get();
+
+//     if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+//         return new ResponseEntity<>("Passwords do not match", HttpStatus.BAD_REQUEST);
+//     }
+
+//     user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+//     user.setResetToken(null); 
+//     userRepository.save(user);
+
+//     return new ResponseEntity<>("Password has been reset successfully", HttpStatus.OK);
+// }
 
 
         

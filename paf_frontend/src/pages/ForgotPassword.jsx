@@ -21,7 +21,7 @@ const ForgotPassword = () => {
 
     try {
         const res = await API.post("/users/forgot-password", { email });
-        toast.success("Token generated");
+        toast.success("Reset link sent to your email");
         setResetLink(`/reset-password?token=${res.data}`);
     } catch (err) {
       toast.error(err?.response?.data || "Failed to send reset link");
