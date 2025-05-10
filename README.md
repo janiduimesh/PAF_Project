@@ -33,23 +33,42 @@
 ## 📁 Project Structure
 
 lets-cook/
-├── paf_frontend/ # React Frontend
-│ ├── public/images/ # Static images used for hardcoded UI
-│ └── src/
-│ ├── components/ # Header, NaviBar, NaviBar2
-│ ├── pages/
-│ │ ├── Home.jsx # Post wall with likes/comments
-│ │ ├── AllChefs.jsx # Hardcoded chef list
-│ │ ├── My_Recipies.jsx # User’s recipe manager
-│ │ └── Update_Recipies.jsx # Update recipe modal
-│ ├── App.js # Routing setup
-│ └── api.js # Axios instance with baseURL
+├── paf_frontend/                 # React Frontend
+│   ├── node_modules/
+│   ├── public/                   # Public assets (images, logos)
+│   ├── src/                      # React source code
+│   │   ├── components/           # Header, NaviBar, NaviBar2
+│   │   ├── pages/                # Home.jsx, AllChefs.jsx, My_Recipies.jsx, etc.
+│   │   ├── api.js                # Axios instance for backend calls
+│   │   └── App.js                # Frontend routing
+│   ├── .gitignore
+│   ├── package.json
+│   ├── package-lock.json
+│   └── README.md
 │
-├── paf_backend/ # Spring Boot Backend
-│ ├── controller/ # RecipeController, UserController
-│ ├── dto/ # UserDTO, RecipeTO
-│ ├── security/ # JWT auth filters & config
-│ └── application.properties # DB & CORS config
+├── paf_backend/                 # Spring Boot Backend
+│   ├── .mvn/
+│   ├── .vscode/
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/com/example/paf/
+│   │   │   │   ├── config/        # Spring security, JWT config
+│   │   │   │   ├── controller/    # RecipeController, UserController, etc.
+│   │   │   │   ├── DTO/           # Data Transfer Objects
+│   │   │   │   ├── model/         # MongoDB or JPA entity models
+│   │   │   │   ├── repo/          # Repository interfaces
+│   │   │   │   ├── service/       # Business logic
+│   │   │   │   └── PafApplication.java  # Main Spring Boot class
+│   │   │   └── resources/
+│   │   │       ├── static/
+│   │   │       ├── templates/
+│   │   │       └── application.properties
+│   │   └── test/
+│   ├── .gitignore
+│   ├── pom.xml
+│   ├── mvnw
+│   ├── mvnw.cmd
+│   └── README.md
 
 
 
@@ -64,15 +83,14 @@ lets-cook/
 
 ---
 
-### ▶️ Run Frontend
-
-bash
+# ▶️ Run Frontend
 cd paf_frontend
 npm install
 npm start
 
-### ▶️ Run Frontend
 
+# ▶️ Run Backend
 cd paf_backend
 ./mvnw spring-boot:run
+
 
