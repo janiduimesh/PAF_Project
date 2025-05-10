@@ -69,3 +69,22 @@ lets-cook/
 │   ├── mvnw
 │   ├── mvnw.cmd
 │   └── README.md
+
+
+---
+
+## 🚀 Getting Started
+
+### ✅ Prerequisites
+- Node.js and npm
+- JDK 17
+- MongoDB running locally or use MongoDB Atlas
+
+---
+
+### ▶️ Run Frontend
+
+```bash
+cd paf_frontend
+npm install
+npm start
