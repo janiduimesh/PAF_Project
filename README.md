@@ -30,35 +30,36 @@
 
 ---
 
-## 📁 Project Structure
+📁 Project Structure
 
+```bash
 lets-cook/
-├── paf_frontend/                 # React Frontend
+├── paf_frontend/               # React Frontend
 │   ├── node_modules/
-│   ├── public/                   # Public assets (images, logos)
-│   ├── src/                      # React source code
-│   │   ├── components/           # Header, NaviBar, NaviBar2
-│   │   ├── pages/                # Home.jsx, AllChefs.jsx, My_Recipies.jsx, etc.
-│   │   ├── api.js                # Axios instance for backend calls
-│   │   └── App.js                # Frontend routing
+│   ├── public/                 # Public assets (images, logos)
+│   ├── src/                    # React source code
+│   │   ├── components/         # Header, NaviBar, NaviBar2
+│   │   ├── pages/              # Home.jsx, AllChefs.jsx, My_Recipies.jsx, etc.
+│   │   ├── api.js              # Axios instance for backend calls
+│   │   └── App.js              # Frontend routing
 │   ├── .gitignore
 │   ├── package.json
 │   ├── package-lock.json
 │   └── README.md
 │
-├── paf_backend/                 # Spring Boot Backend
+├── paf_backend/                # Spring Boot Backend
 │   ├── .mvn/
 │   ├── .vscode/
 │   ├── src/
 │   │   ├── main/
 │   │   │   ├── java/com/example/paf/
-│   │   │   │   ├── config/        # Spring security, JWT config
-│   │   │   │   ├── controller/    # RecipeController, UserController, etc.
-│   │   │   │   ├── DTO/           # Data Transfer Objects
-│   │   │   │   ├── model/         # MongoDB or JPA entity models
-│   │   │   │   ├── repo/          # Repository interfaces
-│   │   │   │   ├── service/       # Business logic
-│   │   │   │   └── PafApplication.java  # Main Spring Boot class
+│   │   │   │   ├── config/      # Spring security, JWT config
+│   │   │   │   ├── controller/  # RecipeController, UserController, etc.
+│   │   │   │   ├── DTO/         # Data Transfer Objects
+│   │   │   │   ├── model/       # MongoDB or JPA entity models
+│   │   │   │   ├── repo/        # Repository interfaces
+│   │   │   │   ├── service/     # Business logic
+│   │   │   │   └── PafApplication.java
 │   │   │   └── resources/
 │   │   │       ├── static/
 │   │   │       ├── templates/
@@ -69,7 +70,7 @@ lets-cook/
 │   ├── mvnw
 │   ├── mvnw.cmd
 │   └── README.md
-
+```
 
 
 ---
