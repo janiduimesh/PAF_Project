@@ -38,7 +38,7 @@ lets-cook/
 │   ├── public/                 # Public assets (images, logos)
 │   ├── src/
 │   │   ├── components/         # Header, NaviBar, NaviBar2
-│   │   ├── pages/              # Home, AllChefs, My_Recipies, Update_Recipies
+│   │   ├── pages/              # Home, AllChefs, My_Recipies, etc
 │   │   ├── api.js              # Axios instance for backend
 │   │   └── App.js              # Routing setup
 │   ├── .gitignore
