@@ -67,8 +67,8 @@ const ResetPasswordDialog = ({ open, onClose }) => {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Reset Password</DialogTitle>
-      <DialogContent>
+      <DialogTitle sx={{backgroundColor: 'rgb(255, 235, 205)'}}>Reset Password</DialogTitle>
+      <DialogContent sx={{ backgroundColor: 'rgb(255, 249, 230)' }}>
         <Box component="form" noValidate>
           <TextField
             label="Current Password"

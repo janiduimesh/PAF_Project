@@ -75,13 +75,14 @@ const Profile = () => {
             flexGrow: 1,
             px: 3,
             pt: 0,
+            
           }}
         >
           {user ? (
             <Paper
               elevation={3}
               sx={{
-                maxWidth: 600,
+                maxWidth: 800,
                 mx: "auto",
                 p: 4,
                 mt:2,

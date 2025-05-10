@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.Instant;
+
 
 
 import org.springframework.data.annotation.Id;
@@ -39,6 +41,10 @@ public class User {
     private int followersCount;
 
     private List<Notification> notifications = new ArrayList<>();
+
+    private int failedLoginAttempts = 0;
+    private Instant lastFailedLoginTime;
+
 
 
 

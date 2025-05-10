@@ -1,69 +1,47 @@
 import './index.css';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { useEffect, useState } from 'react';
+
+// Pages
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
+import My_Uploads from "./pages/My_Uploads";
 import ForgotPassword from "./pages/ForgotPassword";
+import Recipies from "./pages/Recipies";
+import FullRecipies from "./pages/Full_Recipies";
+import MyRecipies from "./pages/My_Recipies";
+import UpdateRecipie from "./pages/Update_Recipie";
+import InsertRecipies from "./pages/Insert_Recipies";
 import ResetPasswordConfirm from "./pages/ResetPasswordConfirm";
+
+// Components
 import OAuthSuccess from "./components/OAuthSuccess";
-
-
-
-// import Layout from "./components/Layout";
 import PrivateRoute from "./components/PrivateRoute";
 
-
 function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    console.log("✅ In app.js:", token);
-
-    if (!token) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-
-    fetch("http://localhost:8080/api/auth/user", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(res => res.ok ? res.json() : Promise.reject('Not authenticated'))
-      .then(userData => {
-        setUser(userData);
-      })
-      .catch(err => {
-        console.error(err);
-        setUser(null);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <BrowserRouter>
       <Toaster position="top-center" />
       <Routes>
-        {/* Public routes */}
+        {/* ✅ Public Routes */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPasswordConfirm />} />
         <Route path="/oauth-success" element={<OAuthSuccess />} />
-  
+
+        {/* 🔐 Protected Routes (require token via PrivateRoute) */}
         <Route element={<PrivateRoute />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/profile" element={<Profile />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/recipes" element={<Recipies />} />
+          <Route path="/my-uploads" element={<My_Uploads />} />
+          <Route path="/fullrecipies/:id" element={<FullRecipies />} />
+          <Route path="/myrecipies" element={<MyRecipies />} />
+          <Route path="/insertrecipie" element={<InsertRecipies />}/>
+          <Route path="/updaterecipie/:id" element={<UpdateRecipie />}/>
 
         </Route>
       </Routes>

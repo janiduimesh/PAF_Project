@@ -26,7 +26,23 @@ import com.example.paf.model.User;
 import com.example.paf.model.Notification;
 import com.example.paf.repo.UserRepository;
 import com.example.paf.service.UserService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.http.MediaType;
+import java.util.Map;
+
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 
 
@@ -40,6 +56,13 @@ public class UserController {
 
      @Autowired
     private UserService userService;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Value("${groq.api.key}")
+    private String groqApiKey;
+
 
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> createUser(@ModelAttribute User user) {
@@ -143,6 +166,54 @@ public class UserController {
                 return userService.resetPasswordWithToken(request);
             }
 
+        @PostMapping("/chat")
+        public ResponseEntity<?> chatWithGroq(
+                @AuthenticationPrincipal UserDetails userDetails,
+                @RequestBody Map<String, String> payload
+        ) {
+            try {
+                String userPrompt = payload.get("prompt");
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.setBearerAuth(groqApiKey);
+
+                Map<String, Object> body = Map.of(
+                    "model", "llama3-8b-8192",
+                    "messages", List.of(
+                        Map.of("role", "system", "content", "You are a friendly and expert cooking assistant. Only answer cooking-related questions like recipes, ingredients, and kitchen techniques. If the question is not about cooking, politely decline with very short reply."),
+                        Map.of("role", "user", "content", userPrompt)
+                    )
+                );
+                
+
+                HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+                ResponseEntity<String> response = restTemplate.postForEntity(
+                        "https://api.groq.com/openai/v1/chat/completions",
+                        request,
+                        String.class
+                );
+
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+
+                String aiReply = root
+                        .path("choices")
+                        .get(0)
+                        .path("message")
+                        .path("content")
+                        .asText();
+
+                return ResponseEntity.ok(Map.of("response", aiReply));
+
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Map.of("error", "AI chat failed", "details", e.getMessage()));
+            }
+        }
+
+            
 
         
             
